@@ -29,6 +29,8 @@ class SwipeActionCell extends StatefulWidget {
   ///无需多言
   final Widget child;
 
+  final EdgeInsetsGeometry padding;
+
   ///Close actions When you scroll the ListView . default value = true
   ///当你滚动（比如ListView之类的时候，这个item将会关闭拉出的actions，默认为true
   final bool closeWhenScrolling;
@@ -87,6 +89,7 @@ class SwipeActionCell extends StatefulWidget {
     this.firstActionWillCoverAllSpaceOnDeleting = true,
     this.controller,
     this.index,
+    this.padding,
     this.selectedIndicator = const Icon(
       Icons.add_circle,
       color: Colors.blue,
@@ -638,85 +641,90 @@ class SwipeActionCellState extends State<SwipeActionCell>
       ignoring: ignorePointer,
       child: SizeTransition(
         sizeFactor: deleteCurvedAnim,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: editing && !editController.isAnimating
-              ? () {
-                  assert(
-                      widget.index != null,
-                      "From SwipeActionCell:\nIf you want to enter edit mode,please pass the 'index' parameter in SwipeActionCell\n"
-                      "=====================================================================================\n"
-                      "如果你要进入编辑模式，请在SwipeActionCell中传入index 参数，他的值就是你列表组件的itemBuilder中返回的index即可");
+        child: Container(
+          padding: widget.padding,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: editing && !editController.isAnimating
+                ? () {
+                    assert(
+                        widget.index != null,
+                        "From SwipeActionCell:\nIf you want to enter edit mode,please pass the 'index' parameter in SwipeActionCell\n"
+                        "=====================================================================================\n"
+                        "如果你要进入编辑模式，请在SwipeActionCell中传入index 参数，他的值就是你列表组件的itemBuilder中返回的index即可");
 
-                  if (selected) {
-                    widget.controller.selectedSet.remove(widget.index);
-                    _updateControllerSelectedIndexChangedCallback(
-                        selected: false);
-                  } else {
-                    widget.controller.selectedSet.add(widget.index);
-                    _updateControllerSelectedIndexChangedCallback(
-                        selected: true);
+                    if (selected) {
+                      widget.controller.selectedSet.remove(widget.index);
+                      _updateControllerSelectedIndexChangedCallback(
+                          selected: false);
+                    } else {
+                      widget.controller.selectedSet.add(widget.index);
+                      _updateControllerSelectedIndexChangedCallback(
+                          selected: true);
+                    }
+                    setState(() {});
                   }
-                  setState(() {});
-                }
-              : null,
-          onHorizontalDragUpdate:
-              widget.isDraggable ? _onHorizontalDragUpdate : null,
-          onHorizontalDragStart:
-              widget.isDraggable ? _onHorizontalDragStart : null,
-          onHorizontalDragEnd: widget.isDraggable ? _onHorizontalDragEnd : null,
-          child: DecoratedBox(
-            position: DecorationPosition.foreground,
-            decoration: BoxDecoration(
-              color: selected ? Colors.black.withAlpha(30) : Colors.transparent,
-            ),
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                width = constraints.maxWidth;
-                return Stack(
-                  alignment: Alignment.centerLeft,
-                  children: <Widget>[
-                    widget.controller != null &&
-                            (widget.controller.isEditing ||
-                                editController.isAnimating)
-                        ? _buildSelectedButton(selected)
-                        : const SizedBox(),
-                    _ContentWidget(
-                      onLayoutUpdate: (size) {
-                        this.height = size.height;
-                      },
-                      child: Transform.translate(
-                        offset: editing && !editController.isAnimating
-                            ? Offset(widget.editModeOffset, 0)
-                            : currentOffset,
-                        transformHitTests: false,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: widget.backgroundColor ??
-                                    Theme.of(context).scaffoldBackgroundColor,
-                              ),
-                              child: IgnorePointer(
-                                  ignoring:
-                                      editController.isAnimating || editing,
-                                  child: widget.child)),
+                : null,
+            onHorizontalDragUpdate:
+                widget.isDraggable ? _onHorizontalDragUpdate : null,
+            onHorizontalDragStart:
+                widget.isDraggable ? _onHorizontalDragStart : null,
+            onHorizontalDragEnd:
+                widget.isDraggable ? _onHorizontalDragEnd : null,
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                color:
+                    selected ? Colors.black.withAlpha(30) : Colors.transparent,
+              ),
+              child: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  width = constraints.maxWidth;
+                  return Stack(
+                    alignment: Alignment.centerLeft,
+                    children: <Widget>[
+                      widget.controller != null &&
+                              (widget.controller.isEditing ||
+                                  editController.isAnimating)
+                          ? _buildSelectedButton(selected)
+                          : const SizedBox(),
+                      _ContentWidget(
+                        onLayoutUpdate: (size) {
+                          this.height = size.height;
+                        },
+                        child: Transform.translate(
+                          offset: editing && !editController.isAnimating
+                              ? Offset(widget.editModeOffset, 0)
+                              : currentOffset,
+                          transformHitTests: false,
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: widget.backgroundColor ??
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                ),
+                                child: IgnorePointer(
+                                    ignoring:
+                                        editController.isAnimating || editing,
+                                    child: widget.child)),
+                          ),
                         ),
                       ),
-                    ),
-                    currentOffset.dx == 0.0 ||
-                            editController.isAnimating ||
-                            editing
-                        ? const SizedBox()
-                        : _buildActionButtons(),
-                    currentOffset.dx == 0.0 ||
-                            editController.isAnimating ||
-                            editing
-                        ? const SizedBox()
-                        : _buildLeadingActionButtons(),
-                  ],
-                );
-              },
+                      currentOffset.dx == 0.0 ||
+                              editController.isAnimating ||
+                              editing
+                          ? const SizedBox()
+                          : _buildActionButtons(),
+                      currentOffset.dx == 0.0 ||
+                              editController.isAnimating ||
+                              editing
+                          ? const SizedBox()
+                          : _buildLeadingActionButtons(),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

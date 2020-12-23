@@ -105,6 +105,8 @@ class SwipeActionCell extends StatefulWidget {
     this.editModeOffset = 60,
   })  : assert(key != null,
             "You should pass a key like [ValueKey] or [ObjectKey]"),
+        assert(key != null,
+            "You should pass a key like [ValueKey] or [ObjectKey]"),
 
         ///关于key ！= null请看下面的注释
 
@@ -407,7 +409,7 @@ class SwipeActionCellState extends State<SwipeActionCell>
 
     ///set performsFirstActionWithFullSwipe
     if (widget.performsFirstActionWithFullSwipe) {
-      if (currentOffset.dx.abs() > 0.75 * width) {
+      if (currentOffset.dx.abs() > 0.6 * width) {
         if (!lastItemOut) {
           SwipeActionStore.getInstance()
               .bus
